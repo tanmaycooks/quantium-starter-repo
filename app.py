@@ -5,7 +5,6 @@ from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
-from datetime import datetime
 
 # Initialize the app
 app = Dash(__name__)
@@ -21,63 +20,167 @@ max_date = df['date'].max()
 
 # Define color scheme for regions
 region_colors = {
-    'north': '#1f77b4',
-    'south': '#ff7f0e',
-    'east': '#2ca02c',
-    'west': '#d62728'
+    'north': '#1AEDCF',
+    'south': '#1AC6ED',
+    'east': '#1AED87',
+    'west': '#1AA4ED'
+}
+
+# Modern color scheme
+colors = {
+    'background': '#0F1419',
+    'card': '#1A1F2E',
+    'text': '#E8E9ED',
+    'text_secondary': '#8B92A8',
+    'accent': '#1AEDCF',
+    'border': '#2A3142'
 }
 
 # App layout
-app.layout = html.Div([
+app.layout = html.Div(style={
+    'backgroundColor': colors['background'],
+    'minHeight': '100vh',
+    'padding': '20px',
+    'fontFamily': "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+}, children=[
     # Header
-    html.Div([
+    html.Div(style={
+        'maxWidth': '1400px',
+        'margin': '0 auto',
+        'marginBottom': '40px'
+    }, children=[
         html.H1('Pink Morsel Sales Dashboard', 
-                style={'textAlign': 'center', 'color': '#2c3e50', 'marginBottom': 10}),
+                style={
+                    'textAlign': 'center',
+                    'color': colors['text'],
+                    'marginBottom': '10px',
+                    'fontSize': '42px',
+                    'fontWeight': '700',
+                    'letterSpacing': '-0.5px'
+                }),
         html.P('Interactive visualization of pink morsel sales data across regions',
-               style={'textAlign': 'center', 'color': '#7f8c8d', 'marginBottom': 30})
+               style={
+                   'textAlign': 'center',
+                   'color': colors['text_secondary'],
+                   'fontSize': '16px',
+                   'marginBottom': '0'
+               })
     ]),
     
-    # Filters Section
-    html.Div([
-        html.Div([
-            html.Label('Select Date Range:', style={'fontWeight': 'bold', 'marginBottom': 5}),
-            dcc.DatePickerRange(
-                id='date-range',
-                start_date=min_date,
-                end_date=max_date,
-                display_format='YYYY-MM-DD',
-                style={'marginBottom': 10}
-            ),
-        ], style={'padding': 10, 'flex': 1}),
+    # Main Content Container
+    html.Div(style={
+        'maxWidth': '1400px',
+        'margin': '0 auto'
+    }, children=[
+        # Filters Card
+        html.Div(style={
+            'backgroundColor': colors['card'],
+            'borderRadius': '12px',
+            'padding': '30px',
+            'marginBottom': '30px',
+            'border': f'1px solid {colors["border"]}',
+            'boxShadow': '0 4px 6px rgba(0, 0, 0, 0.3)'
+        }, children=[
+            html.Div(style={'display': 'flex', 'gap': '40px', 'flexWrap': 'wrap'}, children=[
+                # Date Range Picker
+                html.Div(style={'flex': '1', 'minWidth': '300px'}, children=[
+                    html.Label('Select Date Range', 
+                              style={
+                                  'color': colors['text'],
+                                  'fontSize': '14px',
+                                  'fontWeight': '600',
+                                  'marginBottom': '12px',
+                                  'display': 'block'
+                              }),
+                    dcc.DatePickerRange(
+                        id='date-range',
+                        start_date=min_date,
+                        end_date=max_date,
+                        display_format='YYYY-MM-DD',
+                        style={'width': '100%'}
+                    ),
+                ]),
+                
+                # Region Radio Buttons
+                html.Div(style={'flex': '1', 'minWidth': '300px'}, children=[
+                    html.Label('Filter by Region',
+                              style={
+                                  'color': colors['text'],
+                                  'fontSize': '14px',
+                                  'fontWeight': '600',
+                                  'marginBottom': '12px',
+                                  'display': 'block'
+                              }),
+                    dcc.RadioItems(
+                        id='region-filter',
+                        options=[
+                            {'label': ' All Regions', 'value': 'all'},
+                            {'label': ' North', 'value': 'north'},
+                            {'label': ' East', 'value': 'east'},
+                            {'label': ' South', 'value': 'south'},
+                            {'label': ' West', 'value': 'west'}
+                        ],
+                        value='all',
+                        inline=True,
+                        style={'marginTop': '8px'},
+                        labelStyle={
+                            'display': 'inline-block',
+                            'marginRight': '20px',
+                            'color': colors['text_secondary'],
+                            'fontSize': '14px',
+                            'cursor': 'pointer'
+                        },
+                        inputStyle={
+                            'marginRight': '6px',
+                            'cursor': 'pointer'
+                        }
+                    ),
+                ]),
+            ])
+        ]),
         
-        html.Div([
-            html.Label('Select Regions:', style={'fontWeight': 'bold', 'marginBottom': 5}),
-            dcc.Dropdown(
-                id='region-filter',
-                options=[{'label': region.title(), 'value': region} for region in regions],
-                value=regions,  # All regions selected by default
-                multi=True,
-                style={'marginBottom': 10}
-            ),
-        ], style={'padding': 10, 'flex': 1}),
-    ], style={'display': 'flex', 'flexDirection': 'row', 'backgroundColor': '#ecf0f1', 
-              'borderRadius': 5, 'marginBottom': 20}),
-    
-    # Charts Section
-    html.Div([
-        # Time Series Chart
-        html.Div([
-            html.H3('Sales Over Time', style={'textAlign': 'center', 'color': '#34495e'}),
-            dcc.Graph(id='time-series-chart')
-        ], style={'marginBottom': 30}),
-        
-        # Regional Comparison Chart
-        html.Div([
-            html.H3('Regional Sales Comparison', style={'textAlign': 'center', 'color': '#34495e'}),
-            dcc.Graph(id='regional-chart')
-        ], style={'marginBottom': 20}),
+        # Charts Grid
+        html.Div(style={'display': 'grid', 'gap': '30px'}, children=[
+            # Time Series Chart Card
+            html.Div(style={
+                'backgroundColor': colors['card'],
+                'borderRadius': '12px',
+                'padding': '30px',
+                'border': f'1px solid {colors["border"]}',
+                'boxShadow': '0 4px 6px rgba(0, 0, 0, 0.3)'
+            }, children=[
+                html.H3('Sales Over Time', 
+                       style={
+                           'color': colors['text'],
+                           'fontSize': '20px',
+                           'fontWeight': '600',
+                           'marginBottom': '20px',
+                           'marginTop': '0'
+                       }),
+                dcc.Graph(id='time-series-chart', config={'displayModeBar': False})
+            ]),
+            
+            # Regional Comparison Chart Card
+            html.Div(style={
+                'backgroundColor': colors['card'],
+                'borderRadius': '12px',
+                'padding': '30px',
+                'border': f'1px solid {colors["border"]}',
+                'boxShadow': '0 4px 6px rgba(0, 0, 0, 0.3)'
+            }, children=[
+                html.H3('Regional Sales Comparison',
+                       style={
+                           'color': colors['text'],
+                           'fontSize': '20px',
+                           'fontWeight': '600',
+                           'marginBottom': '20px',
+                           'marginTop': '0'
+                       }),
+                dcc.Graph(id='regional-chart', config={'displayModeBar': False})
+            ]),
+        ])
     ])
-], style={'maxWidth': 1200, 'margin': '0 auto', 'padding': 20, 'fontFamily': 'Arial, sans-serif'})
+])
 
 
 # Callback for updating charts based on filters
@@ -88,7 +191,7 @@ app.layout = html.Div([
      Input('date-range', 'end_date'),
      Input('region-filter', 'value')]
 )
-def update_charts(start_date, end_date, selected_regions):
+def update_charts(start_date, end_date, selected_region):
     # Filter data based on selections
     filtered_df = df.copy()
     
@@ -99,9 +202,9 @@ def update_charts(start_date, end_date, selected_regions):
         filtered_df = filtered_df[(filtered_df['date'] >= start_date) & 
                                   (filtered_df['date'] <= end_date)]
     
-    # Filter by region if selections exist
-    if selected_regions and len(selected_regions) > 0:
-        filtered_df = filtered_df[filtered_df['region'].isin(selected_regions)]
+    # Filter by region if not 'all'
+    if selected_region and selected_region != 'all':
+        filtered_df = filtered_df[filtered_df['region'] == selected_region]
     
     # Time Series Chart - Sales over time by region
     time_series_data = filtered_df.groupby(['date', 'region'])['sales'].sum().reset_index()
@@ -111,16 +214,35 @@ def update_charts(start_date, end_date, selected_regions):
                               y='sales', 
                               color='region',
                               color_discrete_map=region_colors,
-                              labels={'sales': 'Total Sales ($)', 'date': 'Date', 'region': 'Region'},
-                              title='')
+                              labels={'sales': 'Total Sales ($)', 'date': 'Date', 'region': 'Region'})
     
     fig_time_series.update_layout(
         hovermode='x unified',
-        plot_bgcolor='white',
-        paper_bgcolor='white',
-        xaxis=dict(showgrid=True, gridcolor='lightgray'),
-        yaxis=dict(showgrid=True, gridcolor='lightgray'),
-        legend=dict(title='Region', orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1)
+        plot_bgcolor=colors['card'],
+        paper_bgcolor=colors['card'],
+        font=dict(color=colors['text'], family="'Inter', sans-serif"),
+        xaxis=dict(
+            showgrid=True,
+            gridcolor=colors['border'],
+            color=colors['text'],
+            title_font=dict(size=13, color=colors['text_secondary'])
+        ),
+        yaxis=dict(
+            showgrid=True,
+            gridcolor=colors['border'],
+            color=colors['text'],
+            title_font=dict(size=13, color=colors['text_secondary'])
+        ),
+        legend=dict(
+            font=dict(color=colors['text']),
+            bgcolor='rgba(0,0,0,0)',
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='right',
+            x=1
+        ),
+        margin=dict(l=60, r=20, t=40, b=60)
     )
     
     # Regional Comparison Chart - Total sales by region
@@ -134,16 +256,29 @@ def update_charts(start_date, end_date, selected_regions):
             marker_color=[region_colors.get(r, '#808080') for r in regional_totals['region']],
             text=regional_totals['sales'].apply(lambda x: f'${x:,.0f}'),
             textposition='auto',
+            textfont=dict(color=colors['text'], size=12),
+            hovertemplate='<b>%{x}</b><br>Sales: $%{y:,.0f}<extra></extra>'
         )
     ])
     
     fig_regional.update_layout(
         xaxis_title='Region',
         yaxis_title='Total Sales ($)',
-        plot_bgcolor='white',
-        paper_bgcolor='white',
-        xaxis=dict(showgrid=False),
-        yaxis=dict(showgrid=True, gridcolor='lightgray'),
+        plot_bgcolor=colors['card'],
+        paper_bgcolor=colors['card'],
+        font=dict(color=colors['text'], family="'Inter', sans-serif"),
+        xaxis=dict(
+            showgrid=False,
+            color=colors['text'],
+            title_font=dict(size=13, color=colors['text_secondary'])
+        ),
+        yaxis=dict(
+            showgrid=True,
+            gridcolor=colors['border'],
+            color=colors['text'],
+            title_font=dict(size=13, color=colors['text_secondary'])
+        ),
+        margin=dict(l=60, r=20, t=20, b=60)
     )
     
     return fig_time_series, fig_regional
