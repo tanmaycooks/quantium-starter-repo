@@ -1,0 +1,7 @@
+dash
+pandas
+plotly
+dash[testing]
+pytest
+selenium
+webdriver-manager
