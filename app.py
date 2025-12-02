@@ -131,7 +131,7 @@ def update_charts(start_date, end_date, selected_regions):
         go.Bar(
             x=regional_totals['region'],
             y=regional_totals['sales'],
-            marker_color=[region_colors[r] for r in regional_totals['region']],
+            marker_color=[region_colors.get(r, '#808080') for r in regional_totals['region']],
             text=regional_totals['sales'].apply(lambda x: f'${x:,.0f}'),
             textposition='auto',
         )
